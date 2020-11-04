@@ -1,0 +1,33 @@
+import nxlog, requests
+
+def request_metadata(item):
+    """Gets value of metadata attribute 'item', returns text string"""
+    # Set metadata URL
+    metaurl = 'http://169.254.169.254/latest/meta-data/{0}'.format(item)
+
+    # Send HTTP GET request
+    r = requests.get(metaurl)
+
+    # If present, get text payload from the response
+    if r.status_code != 404:
+        value = r.text
+    else:
+        value = None
+
+    # Return text value
+    return value
+
+def get_attribute(event):
+    """Reads metadata and stores as an event field"""
+    # Get nxlog module object
+    module = event.module
+
+    # Set an attribute to retrieve; in this case: AWS EC2 instance-id
+    attribute = 'instance-id'
+
+    # Request for metadata only if not already present in the module
+    if 'metadata' not in module:
+        module['metadata'] = request_metadata(attribute)
+
+    # Save metadata as an event field
+    event.set_field(attribute, module['metadata'])

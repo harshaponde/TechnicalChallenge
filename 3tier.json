@@ -1,0 +1,497 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Application's Web Tier for Environment (which consists of an ALB and web instances)",
+    "Parameters": {},
+    "Mappings": {},
+    "Resources": {
+        "WebDevUSEast1Ec2Instance001": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "BlockDeviceMappings": [{
+                        "DeviceName": "/dev/xvda",
+                        "Ebs": {
+                            "VolumeSize": 8,
+                            "VolumeType": "gp2"
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": 100,
+                            "Encrypted": true,
+                            "VolumeType": "gp2"
+                        }
+                    }
+                ],
+                "DisableApiTermination": false,
+                "IamInstanceProfile": "customer-mc-ec2-instance-profile",
+                "EbsOptimized": false,
+                "ImageId": "ami-0e3507d0bb092f4",
+                "InstanceInitiatedShutdownBehavior": "stop",
+                "InstanceType": "t3.large",
+                "KeyName": "cf-test",
+                "Monitoring": true,
+                "SubnetId": "subnet-04c3c68122f6a1983",
+                "SecurityGroupIds": [
+                    "sg-09995a8f2b51d659e"
+                ],
+                "SourceDestCheck": true,
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Sub": "#!/bin/bash -xe\nsudo echo -e \"\\nprocess_config:\" >> /etc/datadog-agent/datadog.yaml\nsudo echo -e \"  enabled: true\" >> /etc/datadog-agent/datadog.yaml\nsudo sh /etc/datadog-agent/enable_datadog_agent.sh be94346270962643ad9784e4c3b0638\n"
+                    }
+                },
+                "Tags": [{
+                        "Key": "Name",
+                        "Value": "applicationname-dev-use1-web-instance-001"
+                    },
+                    {
+                        "Key": "tr:environment-type",
+                        "Value": "DEVELOPMENT"
+                    },
+                    {
+                        "Key": "tr:environment-name",
+                        "Value": "dev"
+                    },
+                    {
+                        "Key": "tr:resource-owner",
+                        "Value": "abc@gmail.com"
+                    },
+                    {
+                        "Key": "tr:project-name",
+                        "Value": "Project1"
+                    },
+                    {
+                        "Key": "tr:service-name",
+                        "Value": "Web"
+                    }
+                ]
+            }
+        },
+        "WebDevUSEast1Ec2Instance002": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "BlockDeviceMappings": [{
+                        "DeviceName": "/dev/xvda",
+                        "Ebs": {
+                            "VolumeSize": 8,
+                            "VolumeType": "gp2"
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": 100,
+                            "Encrypted": true,
+                            "VolumeType": "gp2"
+                        }
+                    }
+                ],
+                "DisableApiTermination": false,
+                "IamInstanceProfile": "customer-mc-ec2-instance-profile",
+                "EbsOptimized": false,
+                "ImageId": "ami-0e3507f402bb092f4",
+                "InstanceInitiatedShutdownBehavior": "stop",
+                "InstanceType": "t3.large",
+                "KeyName": "cf-test",
+                "Monitoring": true,
+                "SubnetId": "subnet-0381bbe2dc4d4e234",
+                "SecurityGroupIds": [
+                    "sg-09995a8f2b51d659e"
+                ],
+                "SourceDestCheck": true,
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Sub": "#!/bin/bash -xe\nsudo echo -e \"\\nprocess_config:\" >> /etc/datadog-agent/datadog.yaml\nsudo echo -e \"  enabled: true\" >> /etc/datadog-agent/datadog.yaml\nsudo sh /etc/datadog-agent/enable_datadog_agent.sh be9a4a6270573643ad9784e4c3b0638\n"
+                    }
+                },
+                "Tags": [{
+                        "Key": "Name",
+                        "Value": "applicationname-dev-use1-web-instance-002"
+                    },
+                    {
+                        "Key": "tr:environment-type",
+                        "Value": "DEVELOPMENT"
+                    },
+                    {
+                        "Key": "tr:environment-name",
+                        "Value": "dev"
+                    },
+                    {
+                        "Key": "tr:resource-owner",
+                        "Value": "abc@gmail.com"
+                    },
+                    {
+                        "Key": "tr:project-name",
+                        "Value": "Project1"
+                    },
+                    {
+                        "Key": "tr:service-name",
+                        "Value": "Web"
+                    }
+                ]
+            }
+        },
+        "WebDevUSEast1ALB": {
+            "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            "Properties": {
+                "Name": "applicationname-web-Dev-USEast1-alb",
+                "SecurityGroups": [
+                    "sg-0709d7fd50608a33d"
+                ],
+                "Scheme": "internet-facing",
+                "Subnets": [
+                    "subnet-04c3c68122f6a1983",
+                    "subnet-0381bbe2dc4d4e234"
+                ],
+                "LoadBalancerAttributes": [{
+                    "Key": "idle_timeout.timeout_seconds",
+                    "Value": 60
+                }],
+                "Tags": [{
+                        "Key": "Name",
+                        "Value": "applicationname-web-Dev-USEast1-alb"
+                    },
+                    {
+                        "Key": "Tier",
+                        "Value": "Web"
+                    }
+                ]
+            }
+        },
+        "WebDevUSEast1ALBListener000": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "Certificates": [{
+                    "CertificateArn": "arn:aws:acm:us-east-1:69523045745:certificate/8abf30ae-9dab-4r31-8667-e4e3f5193d98"
+                }],
+                "DefaultActions": [{
+                    "Type": "forward",
+                    "TargetGroupArn": {
+                        "Ref": "WebDevUSEast1ALBTargetGroup000"
+                    }
+                }],
+                "LoadBalancerArn": {
+                    "Ref": "WebDevUSEast1ALB"
+                },
+                "Port": 443,
+                "Protocol": "HTTPS"
+            }
+        },
+        "WebDevUSEast1ALBTargetGroup000": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "Properties": {
+                "Targets": [{
+                        "Id": {
+                            "Ref": "WebDevUSEast1Ec2Instance001"
+                        }
+                    },
+                    {
+                        "Id": {
+                            "Ref": "WebDevUSEast1Ec2Instance002"
+                        }
+                    }
+                ],
+                "HealthCheckIntervalSeconds": 10,
+                "HealthCheckTimeoutSeconds": 5,
+                "HealthyThresholdCount": 3,
+                "HealthCheckPort": 8080,
+                "Port": 8080,
+                "Protocol": "HTTP",
+                "UnhealthyThresholdCount": 5,
+                "VpcId": "vpc-0b128dc9f13fad180",
+                "TargetGroupAttributes": [{
+                    "Key": "deregistration_delay.timeout_seconds",
+                    "Value": 150
+                }]
+            }
+        },
+        "appapiDEVUSEast1Instance001": {
+            "Type": "AWS::EC2::Instance",
+            "CreationPolicy": {
+                "ResourceSignal": {
+                    "Count": "1",
+                    "Timeout": "PT75M"
+                }
+            },
+            "Properties": {
+                "Monitoring": true,
+                "IamInstanceProfile": "customer-mc-ec2-instance-profile",
+                "ImageId": "ami-041a0943b0f82a5e7",
+                "SecurityGroupIds": ["sg-0c11af5d1b0b99ef7", {
+                    "Fn::ImportValue": {
+                        "Fn::Sub": "SentinelDefaultSecurityGroupPrivateOnly-${AWS::Region}"
+                    }
+                }, {
+                    "Fn::ImportValue": {
+                        "Fn::Sub": "SentinelDefaultSecurityGroupPrivateOnlyEgressAll-${AWS::Region}"
+                    }
+                }],
+                "SubnetId": "subnet-096aa59ad641df419",
+                "InstanceInitiatedShutdownBehavior": "stop",
+                "InstanceType": "t3.large",
+                "SourceDestCheck": true,
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": ["\n", ["<powershell>", "Install-WindowsFeature -Name Web-Server -IncludeManagementTools", "Add-Content -Path C:\\ProgramData\\Datadog\\datadog.yaml -Value \"`nprocess_config:`n  enabled:`ttrue\"", "C:\\instance_files\\datadog\\activate_datadog_agent.ps1", "</powershell>"]]
+                    }
+                },
+                "EbsOptimized": false,
+                "Tags": [{
+                        "Key": "Name",
+                        "Value": "applicationname-dev-use1-app-instance-002"
+                    },
+                    {
+                        "Key": "tr:environment-type",
+                        "Value": "DEVELOPMENT"
+                    },
+                    {
+                        "Key": "tr:environment-name",
+                        "Value": "dev"
+                    },
+                    {
+                        "Key": "tr:resource-owner",
+                        "Value": "abc@gmail.com"
+                    },
+                    {
+                        "Key": "tr:project-name",
+                        "Value": "Project1"
+                    },
+                    {
+                        "Key": "tr:service-name",
+                        "Value": "app"
+                    }
+                ]
+            }
+        },
+        "appapiDEVUSEast1NotificationTopic": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+                "Subscription": [{
+                    "Protocol": "email",
+                    "Endpoint": "abc@gmail.com"
+                }]
+            }
+        },
+        "appapiprodUSEast1Instance002": {
+            "Type": "AWS::EC2::Instance",
+            "CreationPolicy": {
+                "ResourceSignal": {
+                    "Count": "1",
+                    "Timeout": "PT75M"
+                }
+            },
+            "Properties": {
+                "Monitoring": true,
+                "IamInstanceProfile": "customer-mc-ec2-instance-profile",
+                "ImageId": "ami-041a0943b0f82a5e7",
+                "SecurityGroupIds": ["sg-0c11af5d1b0b99ef7", {
+                    "Fn::ImportValue": {
+                        "Fn::Sub": "SentinelDefaultSecurityGroupPrivateOnly-${AWS::Region}"
+                    }
+                }, {
+                    "Fn::ImportValue": {
+                        "Fn::Sub": "SentinelDefaultSecurityGroupPrivateOnlyEgressAll-${AWS::Region}"
+                    }
+                }],
+                "SubnetId": "subnet-0f12c0eeb534c9c8e",
+                "InstanceInitiatedShutdownBehavior": "stop",
+                "InstanceType": "t3.large",
+                "SourceDestCheck": true,
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": ["\n", ["<powershell>", "Install-WindowsFeature -Name Web-Server -IncludeManagementTools", "Add-Content -Path C:\\ProgramData\\Datadog\\datadog.yaml -Value \"`nprocess_config:`n  enabled:`ttrue\"", "C:\\instance_files\\datadog\\activate_datadog_agent.ps1", "</powershell>"]]
+                    }
+                },
+                "EbsOptimized": false,
+                "Tags": [{
+                        "Key": "Name",
+                        "Value": "applicationname-dev-use1-app-instance-002"
+                    },
+                    {
+                        "Key": "tr:environment-type",
+                        "Value": "DEVELOPMENT"
+                    },
+                    {
+                        "Key": "tr:environment-name",
+                        "Value": "dev"
+                    },
+                    {
+                        "Key": "tr:resource-owner",
+                        "Value": "abc@gmail.com"
+                    },
+                    {
+                        "Key": "tr:project-name",
+                        "Value": "Project1"
+                    },
+                    {
+                        "Key": "tr:service-name",
+                        "Value": "app"
+                    }
+                ]
+            }
+        },
+        "DBDEVUSEast1DatabaseSubnetGroup": {
+            "Type": "AWS::RDS::DBSubnetGroup",
+            "Properties": {
+                "DBSubnetGroupDescription": "DB subnet group for Indirect Tax DFI Managed Services Application",
+                "SubnetIds": [
+                    "subnet-096aa59ad641df419",
+                    "subnet-0f12c0eeb534c9c8e"
+                ]
+            }
+        },
+        "DBDEVUSEast1DBClusterParameterGroup": {
+            "Type": "AWS::RDS::DBClusterParameterGroup",
+            "Properties": {
+                "Description": "DB cluster parameter group for Indirect Tax DFI Managed Services Application",
+                "Family": "aurora-postgresql9.6",
+                "Parameters": {
+                    "timezone": "US/Eastern"
+                }
+            }
+        },
+        "DBDEVUSEast1RDSDBParameterGroup": {
+            "Type": "AWS::RDS::DBParameterGroup",
+            "Properties": {
+                "Description": "DB parameter group for Indirect Tax DFI Managed Services Application",
+                "Family": "aurora-postgresql9.6"
+            }
+        },
+        "DBDEVUSEast1DBCluster": {
+            "Type": "AWS::RDS::DBCluster",
+            "Properties": {
+                "BackupRetentionPeriod": 1,
+                "Engine": "aurora-postgresql",
+                "EngineVersion": "9.6.8",
+                "Port": 5432,
+                "DBClusterIdentifier": "applicationname-DEV-USEast1-clusterdb",
+                "DatabaseName": "indirecttaxdfimsclouddbuat",
+                "KmsKeyId": "arn:aws:kms:us-east-1:965578820099:key/245051f2-a7da-4752-a81a-d7b02e5b9b84",
+                "StorageEncrypted": true,
+                "MasterUsername": "{{resolve:secretsmanager:customer-rds/DFICloudDBUATUSEast1Secret:SecretString:username}}",
+                "MasterUserPassword": "{{resolve:secretsmanager:customer-rds/DFICloudDBUATUSEast1Secret:SecretString:password}}",
+                "DBSubnetGroupName": {
+                    "Ref": "DBDEVUSEast1DatabaseSubnetGroup"
+                },
+                "VpcSecurityGroupIds": [
+                    "sg-0f83f0cc2ea00f921"
+                ],
+                "DBClusterParameterGroupName": {
+                    "Ref": "DBDEVUSEast1DBClusterParameterGroup"
+                },
+                 "Tags": [{
+                        "Key": "Name",
+                        "Value": "applicationname-dev-use1-DB-instance-001"
+                    },
+                    {
+                        "Key": "tr:environment-type",
+                        "Value": "DEVELOPMENT"
+                    },
+                    {
+                        "Key": "tr:environment-name",
+                        "Value": "dev"
+                    },
+                    {
+                        "Key": "tr:resource-owner",
+                        "Value": "abc@gmail.com"
+                    },
+                    {
+                        "Key": "tr:project-name",
+                        "Value": "Project1"
+                    },
+                    {
+                        "Key": "tr:service-name",
+                        "Value": "app"
+                    }
+                ]
+            }
+        },
+        "DBDEVUSEast1DatabasePrimaryInstance": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "DBClusterIdentifier": {
+                    "Ref": "DBDEVUSEast1DBCluster"
+                },
+                "DBParameterGroupName": {
+                    "Ref": "DBDEVUSEast1RDSDBParameterGroup"
+                },
+                "DBSubnetGroupName": {
+                    "Ref": "DBDEVUSEast1DatabaseSubnetGroup"
+                },
+                "PubliclyAccessible": false,
+                "DBInstanceClass": "db.r4.xlarge",
+                "DBInstanceIdentifier": "applicatinname-dev-db-use1-instance001",
+                "Engine": "aurora-postgresql",
+                 "Tags": [{
+                        "Key": "Name",
+                        "Value": "applicationname-dev-use1-DB-instance-Primary"
+                    },
+                    {
+                        "Key": "tr:environment-type",
+                        "Value": "DEVELOPMENT"
+                    },
+                    {
+                        "Key": "tr:environment-name",
+                        "Value": "dev"
+                    },
+                    {
+                        "Key": "tr:resource-owner",
+                        "Value": "abc@gmail.com"
+                    },
+                    {
+                        "Key": "tr:project-name",
+                        "Value": "Project1"
+                    },
+                    {
+                        "Key": "tr:service-name",
+                        "Value": "app"
+                    }
+                ]
+            }
+        },
+        "DBDEVUSEast1DatabaseReplicaInstance": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "DBClusterIdentifier": {
+                    "Ref": "DBDEVUSEast1DBCluster"
+                },
+                "DBParameterGroupName": {
+                    "Ref": "DBDEVUSEast1RDSDBParameterGroup"
+                },
+                "DBSubnetGroupName": {
+                    "Ref": "DBDEVUSEast1DatabaseSubnetGroup"
+                },
+                "PubliclyAccessible": false,
+                "DBInstanceClass": "db.r4.xlarge",
+                "DBInstanceIdentifier": "applicationname-dev-db-use1-Replica",
+                "Engine": "aurora-postgresql",
+                 "Tags": [{
+                        "Key": "Name",
+                        "Value": "applicationname-dev-use1-DB-instance-Replica"
+                    },
+                    {
+                        "Key": "tr:environment-type",
+                        "Value": "DEVELOPMENT"
+                    },
+                    {
+                        "Key": "tr:environment-name",
+                        "Value": "dev"
+                    },
+                    {
+                        "Key": "tr:resource-owner",
+                        "Value": "abc@gmail.com"
+                    },
+                    {
+                        "Key": "tr:project-name",
+                        "Value": "Project1"
+                    },
+                    {
+                        "Key": "tr:service-name",
+                        "Value": "app"
+                    }
+                ]
+            }
+        }
+    }
+}
